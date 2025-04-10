@@ -1,0 +1,95 @@
+/**
+ * diego-dnd - Estilos básicos para el sistema de arrastrar y soltar
+ */
+
+/* Elementos arrastrables */
+.diego-dnd-draggable {
+    cursor: grab;
+    user-select: none;
+    position: relative;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  
+  .diego-dnd-draggable:active {
+    cursor: grabbing;
+  }
+  
+  .diego-dnd-dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+  }
+  
+  /* Zonas de destino */
+  .diego-dnd-droppable {
+    position: relative;
+  }
+  
+  .diego-dnd-over {
+    outline: 2px dashed rgba(0, 120, 212, 0.3);
+    outline-offset: -2px;
+    background-color: rgba(0, 120, 212, 0.05);
+  }
+  
+  /* Posiciones de inserción */
+  .diego-dnd-position-before {
+    border-top: 2px solid #0078d4;
+  }
+  
+  .diego-dnd-position-after {
+    border-bottom: 2px solid #0078d4;
+  }
+  
+  .diego-dnd-position-inside {
+    border: 2px solid #0078d4;
+  }
+  
+  /* Vista previa durante arrastre */
+  .diego-dnd-preview {
+    pointer-events: none;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    opacity: 0.85;
+  }
+  
+  /* Indicadores de inserción */
+  .diego-dnd-insertion-indicator {
+    position: absolute;
+    background-color: #0078d4;
+    transition: all 0.2s ease;
+    z-index: 100;
+  }
+  
+  .diego-dnd-insertion-indicator-horizontal {
+    height: 2px;
+    left: 0;
+    right: 0;
+  }
+  
+  .diego-dnd-insertion-indicator-vertical {
+    width: 2px;
+    top: 0;
+    bottom: 0;
+  }
+  
+  /* Estilo para contenedores */
+  .diego-dnd-container {
+    min-height: 2rem;
+    border: 1px dashed #ccc;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  
+  .diego-dnd-container.diego-dnd-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-style: italic;
+  }
+  
+  .diego-dnd-container.diego-dnd-empty::after {
+    content: 'Arrastra elementos aquí';
+  }

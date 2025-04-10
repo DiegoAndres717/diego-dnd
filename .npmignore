@@ -1,0 +1,24 @@
+# Directorios
+node_modules/
+src/
+example/
+docs/
+.github/
+.vscode/
+.idea/
+
+# Archivos de configuración
+tsconfig.json
+vite.config.js
+.gitignore
+.prettierrc
+.eslintrc
+
+# Ejemplos y tests
+**/*.test.ts
+**/*.spec.ts
+**/*.stories.tsx
+
+# Archivos temporales
+*.log
+.DS_Store
