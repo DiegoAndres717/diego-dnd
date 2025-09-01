@@ -1,78 +1,57 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useDndContext } from '../hooks/useDndContext';
+import { useDndContext } from '../context/DndContext';
 
-export interface DragPreviewProps {
-  /** Función para renderizar el componente de vista previa */
+interface DragPreviewProps {
   children: (item: any, type: string) => React.ReactNode;
-  /** Clase CSS para el contenedor de la vista previa */
+  offset?: { x: number; y: number };
   className?: string;
-  /** Estilo inline para el contenedor */
-  style?: React.CSSProperties;
-  /** Desplazamiento X desde el cursor */
-  offsetX?: number;
-  /** Desplazamiento Y desde el cursor */
-  offsetY?: number;
-  /** Escala de la vista previa (1 = tamaño original) */
-  scale?: number;
 }
 
 /**
- * Componente que muestra una vista previa personalizada durante el arrastre
+ * Vista previa personalizada durante el arrastre
  */
 export const DragPreview: React.FC<DragPreviewProps> = ({
   children,
-  className = 'diego-dnd-preview',
-  style = {},
-  offsetX = 15,
-  offsetY = 15,
-  scale = 0.8
+  offset = { x: 15, y: 15 },
+  className = 'diego-dnd-preview'
 }) => {
-  // Obtener estado del sistema DnD
-  const { isDragging, draggedItem } = useDndContext();
-  
-  // Estado para la posición del mouse
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  
-  // Seguir al cursor durante el arrastre
+  const { isDragging, dragItem, dragPosition } = useDndContext();
+  const [portalRoot] = useState(() => {
+    const div = document.createElement('div');
+    div.className = 'diego-dnd-preview-portal';
+    return div;
+  });
+
   useEffect(() => {
-    if (!isDragging) return;
-    
-    const handleMouseMove = (e: MouseEvent) => {
-      setPosition({
-        x: e.clientX + offsetX,
-        y: e.clientY + offsetY
-      });
-    };
-    
-    document.addEventListener('mousemove', handleMouseMove);
+    if (isDragging) {
+      document.body.appendChild(portalRoot);
+    }
+
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
+      if (document.body.contains(portalRoot)) {
+        document.body.removeChild(portalRoot);
+      }
     };
-  }, [isDragging, offsetX, offsetY]);
-  
-  // Si no hay elemento siendo arrastrado, no renderizar nada
-  if (!isDragging || !draggedItem) {
+  }, [isDragging, portalRoot]);
+
+  if (!isDragging || !dragItem || !dragPosition) {
     return null;
   }
-  
-  // Estilos combinados para la vista previa
-  const previewStyle: React.CSSProperties = {
+
+  const style: React.CSSProperties = {
     position: 'fixed',
     left: 0,
     top: 0,
-    zIndex: 9999,
+    transform: `translate(${dragPosition.x + offset.x}px, ${dragPosition.y + offset.y}px)`,
     pointerEvents: 'none',
-    transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-    transformOrigin: 'top left',
-    ...style
+    zIndex: 9999
   };
-  
-  // Crear portal para renderizar fuera del flujo normal del DOM
+
   return createPortal(
-    <div className={className} style={previewStyle}>
-      {children(draggedItem.data || draggedItem, draggedItem.type)}
+    <div className={className} style={style}>
+      {children(dragItem.data, dragItem.type)}
     </div>,
-    document.body
+    portalRoot
   );
 };

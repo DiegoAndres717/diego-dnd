@@ -1,29 +1,44 @@
-// Componentes principales
-export { DndProvider } from './components/DndContext';
+
+// ===== CORE PROVIDER & CONTEXT =====
+export { DndProvider, useDndContext } from './context/DndContext';
+
+// ===== BASIC COMPONENTS =====
 export { Draggable } from './components/Draggable';
 export { Droppable } from './components/Droppable';
+
+// ===== HIGH-LEVEL COMPONENTS (MOST COMMON USE CASES) =====
+export { SortableList } from './components/SortableList';
+export { DragDropArea } from './components/DragDropArea';
 export { DragPreview } from './components/DragPreview';
 
-// Hooks
+// ===== HOOKS =====
 export { useDrag } from './hooks/useDrag';
 export { useDrop } from './hooks/useDrop';
-export { useDndContext } from './hooks/useDndContext';
 
-// Utilidades
-export { getDropPosition, findClosestElement, applyDropHighlight } from './utils/positionHelpers';
+// ===== UTILITIES =====
+export {
+  generateId,
+  getDropPosition,
+  isCompatibleType,
+  reorderArray,
+  findIndexById,
+  insertAt,
+  removeById
+} from './utils';
 
-// Tipos
+// ===== TYPES (FOR ADVANCED USAGE) =====
 export type {
-  DragItemType,
   DragItem,
-  DragPosition,
-  DropPosition,
+  DragContext,
   DropResult,
-  DndContextType,
-  DragOptions,
-  DropOptions,
-  DndNode
+  DropPosition,
+  DragConfig,
+  DropConfig,
+  AdvancedDragConfig,
+  AdvancedDropConfig,
+  SortableListProps,
+  DragDropAreaProps
 } from './types';
 
-// Versión
-export const VERSION = '0.1.0';
+// ===== VERSION =====
+export const VERSION = '2.0.0';
