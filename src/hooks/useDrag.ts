@@ -1,107 +1,44 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { useDndContext } from './useDndContext';
-import { DragOptions, DragItem } from '../types';
+import { useEffect, useRef } from 'react';
+import { useDndContext } from '../context/DndContext';
+import { DragConfig, AdvancedDragConfig } from '../types';
 
 /**
- * Hook para hacer elementos arrastrables
- * @param options Opciones de configuración para el elemento arrastrable
- * @returns Props y ref para aplicar al elemento
+ * Hook simplificado para hacer elementos arrastrables
  */
-export function useDrag<T extends HTMLElement = HTMLDivElement, DataType = any>(
-  options: DragOptions<DataType, T>
-) {
-  const {
-    id,
-    type,
-    parentId,
-    index,
-    data,
-    disabled = false,
-    onDragStart,
-    onDragEnd
-  } = options;
+export function useDrag(config: DragConfig) {
+  const ref = useRef<HTMLElement>(null);
+  const { registerDraggable, unregisterDraggable, startDrag, isDragging, dragItem } = useDndContext();
+
+  const isActive = isDragging && dragItem?.id === config.id;
   
-  // Referencia al elemento DOM
-  const ref = useRef<T>(null);
-  
-  // Acceder al contexto
-  const { 
-    registerDraggable, 
-    unregisterDraggable, 
-    startDrag,
-    resetDragState,
-    isDragging
-  } = useDndContext();
-  
-  // Registrar el elemento cuando se monta
+  const fullConfig: AdvancedDragConfig = {
+    ...config
+  };
+
   useEffect(() => {
-    if (!disabled && ref.current) {
-      registerDraggable(id, ref as React.RefObject<HTMLElement>);
-    }
-    
+    if (!ref.current || config.disabled) return;
+
+    registerDraggable(config.id, ref.current, fullConfig);
+
     return () => {
-      unregisterDraggable(id);
+      unregisterDraggable(config.id);
     };
-  }, [id, disabled, registerDraggable, unregisterDraggable]);
-  
-  // Manejador para evento de inicio de arrastre
-  const handleDragStart = useCallback((event: React.DragEvent<T>) => {
-    if (disabled) return;
-    
-    event.stopPropagation();
-    
-    // Crear objeto con información del elemento arrastrado
-    const item: DragItem<DataType> = {
-      id,
-      type,
-      parentId,
-      index,
-      data
-    };
-    
-    // Configurar dataTransfer para compatibilidad con el API nativo
-    event.dataTransfer.setData('text/plain', id);
-    event.dataTransfer.setData('application/diego-dnd', JSON.stringify(item));
-    event.dataTransfer.effectAllowed = 'move';
-    
-    // Si hay un elemento semitransparente durante el arrastre (ghost), ajustar su opacidad
-    if (ref.current) {
-      // Opcional: se podría crear una imagen personalizada para el arrastre
+  }, [config.id, config.disabled, fullConfig, registerDraggable, unregisterDraggable]);
+
+  const dragProps = {
+    draggable: !config.disabled,
+    onDragStart: (event: React.DragEvent) => {
+      if (config.disabled) {
+        event.preventDefault();
+        return;
+      }
+      startDrag(fullConfig, event);
     }
-    
-    // Notificar al contexto sobre el inicio del arrastre
-    startDrag(item, event);
-    
-    // Callback opcional para el usuario
-    if (onDragStart) {
-      onDragStart(event);
-    }
-  }, [id, type, parentId, index, data, disabled, startDrag, onDragStart]);
-  
-  // Manejador para evento de fin de arrastre
-  const handleDragEnd = useCallback((event: React.DragEvent<T>) => {
-    // La lógica de finalizar el arrastre ocurre principalmente en el Droppable o el contexto
-    
-    // Callback opcional para el usuario
-    if (onDragEnd) {
-      onDragEnd(event);
-    }
-    
-    // Si por alguna razón el navegador perdió eventos, resetear el estado
-    if (isDragging) {
-      setTimeout(() => {
-        resetDragState();
-      }, 100);
-    }
-  }, [onDragEnd, isDragging, resetDragState]);
-  
+  };
+
   return {
     ref,
-    draggableProps: {
-      draggable: !disabled,
-      onDragStart: handleDragStart,
-      onDragEnd: handleDragEnd
-    },
-    isDragging
+    dragProps,
+    isDragging: isActive
   };
 }

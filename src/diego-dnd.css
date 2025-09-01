@@ -1,95 +1,194 @@
-/**
- * diego-dnd - Estilos básicos para el sistema de arrastrar y soltar
- */
 
-/* Elementos arrastrables */
+
+/* ===== CORE COMPONENTS ===== */
+
+/* Draggable */
 .diego-dnd-draggable {
-    cursor: grab;
-    user-select: none;
-    position: relative;
-    transition: transform 0.1s, box-shadow 0.1s;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.diego-dnd-draggable:active {
+  cursor: grabbing;
+}
+
+.diego-dnd-draggable.diego-dnd-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+  transform: rotate(2deg);
+}
+
+/* Droppable */
+.diego-dnd-droppable {
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.diego-dnd-droppable.diego-dnd-active {
+  background-color: rgba(59, 130, 246, 0.05);
+  border: 2px dashed rgba(59, 130, 246, 0.3);
+  border-radius: 6px;
+}
+
+/* ===== HIGH-LEVEL COMPONENTS ===== */
+
+/* Sortable List */
+.diego-dnd-sortable-list {
+  display: flex;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.diego-dnd-sortable-vertical {
+  flex-direction: column;
+}
+
+.diego-dnd-sortable-horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.diego-dnd-sortable-list:empty::before {
+  content: 'Lista vacía - arrastra elementos aquí';
+  color: #9ca3af;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+/* Drop Area */
+.diego-dnd-drop-area {
+  min-height: 120px;
+  padding: 24px;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.diego-dnd-drop-area.diego-dnd-empty {
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.diego-dnd-drop-area.diego-dnd-drop-active {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.diego-dnd-drop-content {
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Preview */
+.diego-dnd-preview {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: rotate(3deg);
+  opacity: 0.9;
+  max-width: 280px;
+}
+
+/* ===== UTILITIES ===== */
+
+/* Screen reader only */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Focus styles for accessibility */
+.diego-dnd-draggable:focus-visible,
+.diego-dnd-droppable:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Disabled states */
+.diego-dnd-draggable:disabled,
+.diego-dnd-draggable[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.diego-dnd-droppable:disabled,
+.diego-dnd-droppable[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 640px) {
+  .diego-dnd-sortable-horizontal {
+    flex-direction: column;
   }
   
-  .diego-dnd-draggable:active {
-    cursor: grabbing;
+  .diego-dnd-drop-area {
+    min-height: 80px;
+    padding: 16px;
+    font-size: 14px;
   }
-  
-  .diego-dnd-dragging {
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes diego-dnd-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
     opacity: 0.5;
-    cursor: grabbing;
+  }
+}
+
+.diego-dnd-loading {
+  animation: diego-dnd-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+
+@media (prefers-color-scheme: dark) {
+  .diego-dnd-droppable.diego-dnd-active {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.4);
   }
   
-  /* Zonas de destino */
-  .diego-dnd-droppable {
-    position: relative;
+  .diego-dnd-drop-area {
+    background-color: #1f2937;
+    border-color: #4b5563;
+    color: #d1d5db;
   }
   
-  .diego-dnd-over {
-    outline: 2px dashed rgba(0, 120, 212, 0.3);
-    outline-offset: -2px;
-    background-color: rgba(0, 120, 212, 0.05);
+  .diego-dnd-drop-area.diego-dnd-drop-active {
+    background-color: #1e3a8a;
+    border-color: #3b82f6;
+    color: #bfdbfe;
   }
   
-  /* Posiciones de inserción */
-  .diego-dnd-position-before {
-    border-top: 2px solid #0078d4;
-  }
-  
-  .diego-dnd-position-after {
-    border-bottom: 2px solid #0078d4;
-  }
-  
-  .diego-dnd-position-inside {
-    border: 2px solid #0078d4;
-  }
-  
-  /* Vista previa durante arrastre */
   .diego-dnd-preview {
-    pointer-events: none;
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    opacity: 0.85;
+    background: #374151;
+    color: white;
   }
-  
-  /* Indicadores de inserción */
-  .diego-dnd-insertion-indicator {
-    position: absolute;
-    background-color: #0078d4;
-    transition: all 0.2s ease;
-    z-index: 100;
-  }
-  
-  .diego-dnd-insertion-indicator-horizontal {
-    height: 2px;
-    left: 0;
-    right: 0;
-  }
-  
-  .diego-dnd-insertion-indicator-vertical {
-    width: 2px;
-    top: 0;
-    bottom: 0;
-  }
-  
-  /* Estilo para contenedores */
-  .diego-dnd-container {
-    min-height: 2rem;
-    border: 1px dashed #ccc;
-    padding: 0.5rem;
-    border-radius: 4px;
-    background-color: rgba(0, 0, 0, 0.02);
-  }
-  
-  .diego-dnd-container.diego-dnd-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #aaa;
-    font-style: italic;
-  }
-  
-  .diego-dnd-container.diego-dnd-empty::after {
-    content: 'Arrastra elementos aquí';
-  }
+}

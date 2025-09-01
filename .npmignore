@@ -22,3 +22,34 @@ vite.config.js
 # Archivos temporales
 *.log
 .DS_Store
+
+# Código fuente
+src/
+*.test.ts
+*.test.tsx
+**/__tests__/**
+**/test/**
+coverage/
+
+# Archivos de configuración
+vite.config.ts
+vitest.config.ts
+tsconfig.json
+.eslintrc*
+.prettierrc*
+
+# Development
+node_modules/
+.vscode/
+.env*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Solo incluir lo necesario en dist/
+dist/__tests__/
+dist/test/
+dist/**/*.test.*
+dist/**/*.spec.*

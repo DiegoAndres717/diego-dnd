@@ -1,130 +1,144 @@
-/**
- * Tipos de elementos que se pueden arrastrar
- * Permite extensión mediante string para tipos personalizados
- */
-export type DragItemType = string;
 
 /**
- * Información sobre un elemento que está siendo arrastrado
+ * Datos básicos de un elemento arrastrable
  */
-export interface DragItem<T = any> {
+export interface DragItem {
   id: string;
-  type: DragItemType;
-  parentId?: string;
-  index?: number;
-  data?: T;
+  type: string;
+  data?: unknown;
 }
 
 /**
- * Posición de un elemento durante el arrastre
+ * Información completa del elemento durante el arrastre
  */
-export interface DragPosition {
-  x: number;
-  y: number;
+export interface DragContext extends DragItem {
+  sourceIndex?: number;
+  sourceParent?: string;
 }
-
-/**
- * Estado del arrastre por teclado
- */
-export interface KeyboardDragState {
-  active: boolean;
-  sourceId: string | null;
-  currentDroppableId: string | null;
-}
-
-/**
- * Posición relativa donde se soltará un elemento
- */
-export type DropPosition = 'before' | 'after' | 'inside';
 
 /**
  * Resultado de una operación de drop
  */
 export interface DropResult {
+  item: DragItem;
   source: {
-    id: string;
-    type: DragItemType;
-    parentId?: string;
     index?: number;
+    parent?: string;
   };
   destination: {
     id: string;
-    type: DragItemType;
-    parentId?: string;
-    position: DropPosition;
+    index?: number;
+    parent?: string;
   };
-  item: DragItem;
 }
 
 /**
- * Tipo del contexto de Drag and Drop
+ * Posición de inserción
  */
-export interface DndContextType {
+export type DropPosition = 'before' | 'after' | 'inside';
+
+/**
+ * Configuración básica para Draggable
+ */
+export interface DragConfig {
+  id: string;
+  type: string;
+  data?: unknown;
+  disabled?: boolean;
+}
+
+/**
+ * Configuración básica para Droppable  
+ */
+export interface DropConfig {
+  id: string;
+  accept?: string | string[];
+  disabled?: boolean;
+  onDrop?: (result: DropResult) => void;
+}
+
+/**
+ * Configuración avanzada para Draggable
+ */
+export interface AdvancedDragConfig extends DragConfig {
+  sourceIndex?: number;
+  sourceParent?: string;
+  preview?: React.ReactNode;
+  onDragStart?: (item: DragContext) => void;
+  onDragEnd?: (result: DropResult | null) => void;
+  // Accesibilidad
+  ariaLabel?: string;
+  dragInstruction?: string;
+}
+
+/**
+ * Configuración avanzada para Droppable
+ */
+export interface AdvancedDropConfig extends DropConfig {
+  isContainer?: boolean;
+  orientation?: 'horizontal' | 'vertical';
+  onDragEnter?: (item: DragContext) => void;
+  onDragLeave?: (item: DragContext) => void;
+  onDragOver?: (item: DragContext, position: DropPosition) => void;
+  // Accesibilidad  
+  ariaLabel?: string;
+  dropInstruction?: string;
+}
+
+/**
+ * Estado interno del sistema DnD
+ */
+export interface DndState {
   isDragging: boolean;
-  draggedItem: DragItem | null;
-  dragPosition: DragPosition | null;
-  keyboardDragState: KeyboardDragState;
-  registerDraggable: (id: string, ref: React.RefObject<HTMLElement>) => void;
-  registerDroppable: (id: string, ref: React.RefObject<HTMLElement>) => void;
+  dragItem: DragContext | null;
+  dragPosition: { x: number; y: number } | null;
+}
+
+/**
+ * Contexto principal del sistema
+ */
+export interface DndContextValue extends DndState {
+  // Registro de elementos
+  registerDraggable: (id: string, element: HTMLElement, config: AdvancedDragConfig) => void;
+  registerDroppable: (id: string, element: HTMLElement, config: AdvancedDropConfig) => void;
   unregisterDraggable: (id: string) => void;
   unregisterDroppable: (id: string) => void;
-  startDrag: (item: DragItem, event: React.DragEvent<any>) => void;
+  
+  // Control de operaciones
+  startDrag: (config: AdvancedDragConfig, event: React.DragEvent) => void;
   endDrag: (result: DropResult | null) => void;
-  resetDragState: () => void;
-  // Nuevos métodos para accesibilidad
-  startKeyboardDrag: (itemId: string) => void;
-  moveToNextDroppable: (direction: 'up' | 'down' | 'left' | 'right') => void;
-  completeKeyboardDrop: () => void;
+  
+  // Utilidades
+  canDrop: (dragType: string, dropAccept: string | string[]) => boolean;
   announce: (message: string) => void;
 }
 
 /**
- * Opciones para el hook useDrag
+ * Props para componentes de alto nivel
  */
-export interface DragOptions<T = any, E extends Element = Element> {
-  id: string;
-  type: DragItemType;
-  parentId?: string;
-  index?: number;
-  data?: T;
+export interface SortableListProps<T = unknown> {
+  items: Array<T & { id: string }>;
+  onReorder: (items: Array<T & { id: string }>) => void;
+  renderItem: (item: T & {
+      id: string 
+}, index: number) => React.ReactNode;
+  direction?: 'vertical' | 'horizontal';
   disabled?: boolean;
-  dragPreview?: React.ReactNode;
-  onDragStart?: (event: React.DragEvent<E>) => void;
-  onDragEnd?: (event: React.DragEvent<E>) => void;
-  // Nuevas opciones para accesibilidad
-  ariaLabel?: string;
-  ariaDragLabel?: string;
+  className?: string;
+  itemClassName?: string;
+  dragClassName?: string;
+  placeholder?: React.ReactNode;
 }
 
 /**
- * Opciones para el hook useDrop
+ * Props para área de drag and drop simple
  */
-export interface DropOptions {
-  id: string;
-  type: DragItemType | DragItemType[];
-  acceptTypes?: DragItemType[];
-  parentId?: string;
-  isGreedy?: boolean;
+export interface DragDropAreaProps {
+  accept: string | string[];
+  onDrop: (items: DragItem[]) => void;
+  children?: React.ReactNode;
+  className?: string;
+  activeClassName?: string;
   disabled?: boolean;
-  highlightOnDragOver?: boolean;
-  onDragEnter?: (item: DragItem) => void;
-  onDragLeave?: (item: DragItem) => void;
-  onDragOver?: (item: DragItem, position: DropPosition) => void;
-  onDrop?: (item: DragItem, position: DropPosition) => DropResult | null;
-  // Nuevas opciones para accesibilidad
-  ariaLabel?: string;
-  ariaDroppableLabel?: string;
-}
-
-/**
- * Información de un nodo en la estructura anidada
- */
-export interface DndNode {
-  id: string;
-  type: DragItemType;
-  parentId?: string;
-  children?: string[];
-  level: number;
-  index: number;
-  rect?: DOMRect;
+  multiple?: boolean;
 }
